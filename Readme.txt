@@ -1,6 +1,6 @@
 --
 -- LOGICALREP_AUDIT 1.0
--- Author: Yudisney Vazquez Ortíz
+-- Author: Yudisney Vazquez
 -- Email: yvazquezo@gmail.com
 --
 
