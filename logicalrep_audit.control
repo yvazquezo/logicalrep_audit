@@ -1,0 +1,7 @@
+# Author: Yudisney Vazquez Ortíz [ yvazquezo@gmail.com ]
+# Tested: PostgreSQL 11-12-13-14
+
+comment = 'Extension for get information and audit logical replication'
+default_version = '1.0'
+relocatable = false
+superuser = true
