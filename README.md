@@ -60,14 +60,14 @@ Removing the extension can be done following the below step:
   * DROP EXTENSION logicalrep_audit CASCADE;
 
 ## Examples
-To use the functionalities of logicalrep_audit, the extension must be created in the database:
+To use the functionalities of logicalrep_audit, the extension must be created in the database.
 
 #### Create the extension on dell database
     dell=# create extension logicalrep_audit ;
     CREATE EXTENSION
 
 #### Generate the DDL of a publication
-The function "generate_ddl_publication" generates the DDL of the publication passed by parameter, with the tables included in the publication and the publication options:
+The function "generate_ddl_publication" generates the DDL of the publication passed by parameter, with the tables included in the publication and the publication options.
 
 ##### Create a publication on dell database
      dell=# create publication pub_categories for table categories;
@@ -111,6 +111,14 @@ Start tracking of one publication logs on table publication_history all the chan
 * pub_final_ddl: final DDL of the publication after the change.
 
 The initial and final DD is the same when start tracking.
+
+     dell=# \dRp
+                                                      Publications list
+           Name      | Owner        | All tables | Insert | Update | Delete | Truncate | Via root 
+     ----------------+--------------+------------+--------+--------+--------+----------+----------
+      pub_categories | postgres     | f          | t      | t      | t      | t        | f
+      pub_products   | postgres     | f          | t      | t      | t      | t        | f
+     (2 lines)
 
      dell=# select * from logicalrep_audit.track_publication('pub_categories');
       track_publication 
@@ -164,11 +172,11 @@ The initial and final DD is the same when start tracking.
      pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update', publish_via_partition_root = false);
 
 #### Start the tracking of all publications in a database
-Start tracking of all publications in the database logs on table publication_history all the changes made to the structure of all publications.
+Start tracking of all publications in the database logs on publication_history table all the changes made to the structure of all publications.
 
      dell=# select * from logicalrep_audit.track_all_publications();
       track_all_publications 
-     -------------------
+     -----------------------
 
      (1 line)
 
@@ -233,31 +241,457 @@ Start tracking of all publications in the database logs on table publication_his
      pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
 
 #### Reset the tracking of one publication
+Reset tracking of one publication deletes all the rows in publication_history table of the publication and restart the tracking.
 
+     dell=# select * from logicalrep_audit.reset_publication_tracking('pub_categories');
+      reset_publication_tracking 
+     ---------------------------
+
+     (1 line) 
+
+     dell=# select * from logicalrep_audit.publication_history order by date_time;
+     -[ RECORD 1 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:36:43.246432
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update, delete, truncate', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert, update, delete, truncate', publish_via_partition_root = false);
+     -[ RECORD 2 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Alter Publication
+     user_action     | postgres
+     date_time       | 2022-04-12 12:37:27.097779
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update, delete, truncate', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     -[ RECORD 3 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18198
+     pub_name        | pub_categories
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:41:54.132848
+     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
 
 #### Reset the tracking of all publications in a database
+Reset tracking of all publications deletes all the rows in publication_history table of all existing publications and restart their tracking.
 
+     dell=# select * from logicalrep_audit.reset_all_publications_tracking();
+      reset_all_publications_tracking 
+     -------------------
+
+     (1 line) 
+     
+     dell=# select * from logicalrep_audit.publication_history order by date_time;
+     -[ RECORD 1 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18198
+     pub_name        | pub_categories
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:43:54.048892
+     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     -[ RECORD 2 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:43:54.048892
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
 
 #### Stop the tracking of one publication
+Stopping tracking of a publication logs a row in publication_history table alerting of the stopping of the tracking, and does not log subsequent changes.
 
+     dell=# select * from logicalrep_audit.stop_publication_tracking('pub_categories');
+     stop_publication_tracking 
+     -------------------------
+
+     (1 line) 
+
+     dell=# alter publication pub_categories set (publish = 'insert');
+     ALTER PUBLICATION
+     dell=# alter publication pub_products set (publish = 'insert');
+     ALTER PUBLICATION
+     dell=# select * from logicalrep_audit.publication_history order by date_time;
+     -[ RECORD 1 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18198
+     pub_name        | pub_categories
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:43:54.048892
+     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     -[ RECORD 2 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:43:54.048892
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     -[ RECORD 3 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18198
+     pub_name        | pub_categories
+     pub_database    | dell
+     pub_action      | Stop Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:57:06.213717
+     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     -[ RECORD 4 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Alter Publication
+     user_action     | postgres
+     date_time       | 2022-04-12 12:57:42.16169
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert', publish_via_partition_root = false);
 
 #### Stop the tracking of all publications in a database
+Stopping tracking of all publications logs one row for publication on publication_history table alerting of the stopping of the tracking, and does not log subsequent changes.
 
+     dell=# select * from logicalrep_audit.stop_all_publications_tracking();
+     NOTICE:  The publication pub_categories is already being stopped.
+     NOTICE:  The tracking mecanism has been deleted.
+      stop_all_publications_tracking 
+     --------------------------------
+
+     (1 line)
+     
+     dell=# alter publication pub_products set (publish = 'insert, update');
+     ALTER PUBLICATION
+     dell=# alter publication pub_categories set (publish = 'insert, update');
+     ALTER PUBLICATION
+     dell=# select * from logicalrep_audit.publication_history order by date_time;
+     -[ RECORD 1 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18198
+     pub_name        | pub_categories
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:43:54.048892
+     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     -[ RECORD 2 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:43:54.048892
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     -[ RECORD 3 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18198
+     pub_name        | pub_categories
+     pub_database    | dell
+     pub_action      | Stop Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 12:57:06.213717
+     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete', publish_via_partition_root = false);
+     -[ RECORD 4 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Alter Publication
+     user_action     | postgres
+     date_time       | 2022-04-12 12:57:42.16169
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert, update', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert', publish_via_partition_root = false);
+     -[ RECORD 5 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
+     pub_oid         | 18217
+     pub_name        | pub_products
+     pub_database    | dell
+     pub_action      | Stop Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:13:40.032405
+     pub_initial_ddl | CREATE PUBLICATION pub_products WITH (publish = 'insert', publish_via_partition_root = false);
+     pub_final_ddl   | CREATE PUBLICATION pub_products WITH (publish = 'insert', publish_via_partition_root = false);
 
 #### Start the tracking of one subscription
+Start tracking of one subscription logs on table subscription_history all the changes made to the structure of the subscription, logging:
+* sub_oid: identifier of the subscription.
+* sub_name: name of the subscription.
+* sub_database: database where the subscription exists.
+* sub_action: the action in the subscription:
+  * Start Tracking: for the start of the tracking of the subscription
+  * Alter Subscription: for changes in the subscription options
+  * Drop Subscription: for dropped subscriptions
+  * Stop Tracking: for stop the tracking of the subscription
+* user_action: the user who made the change in the subscription.
+* date_time: timestamp of the change.
+* sub_initial_ddl: initial DDL of the subscription before the change.
+* sub_final_ddl: final DDL of the subscription after the change.
 
+The initial and final DD is the same when start tracking.
+
+     dell_rds=# \dRs
+                       Subscriptions list
+           Name      | Owner        | Enable |   Publication    
+     ----------------+--------------+--------+------------------
+      sub_categories | postgres     | t      | {pub_categories}
+      sub_products   | postgres     | t      | {pub_products}
+     (2 lines)
+     
+     dell_rds=# select * from logicalrep_audit.track_subscription('sub_categories');
+      track_subscription 
+     --------------------
+
+     (1 line)
+     dell_rds=# alter subscription sub_categories disable;
+     ALTER SUBSCRIPTION
+     dell_rds=# alter subscription sub_categories enable;
+     ALTER SUBSCRIPTION
+     dell_rds=# select * from logicalrep_audit.subscription_history order by date_time;
+     -[ RECORD 1 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:29:03.109313
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 2 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Alter Subscription
+     user_action     | postgres
+     date_time       | 2022-04-12 13:31:24.397981
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 3 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Alter Subscription
+     user_action     | postgres
+     date_time       | 2022-04-12 13:31:32.723749
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
 
 #### Start the tracking of all subscriptions in a database
+Start tracking of all subscriptions in the database logs on subscription_history table all the changes made to the structure of all subscriptions.
 
+     dell_rds=# select * from logicalrep_audit.track_all_subscriptions();
+      track_all_subscriptions 
+     ------------------------
+
+     (1 line)
+     dell_rds=# alter subscription sub_products disable;
+     ALTER SUBSCRIPTION
+     dell_rds=# select * from logicalrep_audit.subscription_history order by date_time;
+     -[ RECORD 1 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:29:03.109313
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 2 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Alter Subscription
+     user_action     | postgres
+     date_time       | 2022-04-12 13:31:24.397981
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 3 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Alter Subscription
+     user_action     | postgres
+     date_time       | 2022-04-12 13:31:32.723749
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 4 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:33:30.123584
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     -[ RECORD 5 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Alter Subscription
+     user_action     | postgres
+     date_time       | 2022-04-12 13:34:19.60262
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
 
 #### Reset the tracking of one subscription
+Reset tracking of one subscription deletes all the rows in subscription_history table of the subscription and restart the tracking.
 
+     dell_rds=# select * from logicalrep_audit.reset_subscription_tracking('sub_categories');
+      reset_subscription_tracking 
+     ----------------------------
+
+     (1 line)
+     dell_rds=# select * from logicalrep_audit.subscription_history order by date_time;
+     -[ RECORD 1 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:33:30.123584
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Alter Subscription
+     user_action     | postgres
+     date_time       | 2022-04-12 13:34:19.60262
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     -[ RECORD 3 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:36:03.775922
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
 
 #### Reset the tracking of all subscriptions in a database
+Reset tracking of all publicsubscriptionsations deletes all the rows in subscription_history table of all existing subscriptions and restart their tracking.
 
+     dell_rds=# select * from logicalrep_audit.reset_all_subscriptions_tracking();
+     reset_all_subscriptions_tracking 
+     --------------------------------
+
+     (1 line)
+     dell_rds=# select * from logicalrep_audit.subscription_history order by date_time;
+     -[ RECORD 1 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:37:36.816334
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:37:36.816334
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
 
 #### Stop the tracking of one subscription
+Stopping tracking of a subscription logs a row in subscription_history table alerting of the stopping of the tracking, and does not log subsequent changes.
 
+     dell_rds=# select * from logicalrep_audit.stop_subscription_tracking('sub_categories');
+     stop_subscription_tracking 
+     --------------------------
+
+     (1 line)
+     dell_rds=# alter subscription sub_categories disable;
+     ALTER SUBSCRIPTION
+     dell_rds=# select * from logicalrep_audit.subscription_history order by date_time;
+     -[ RECORD 1 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:37:36.816334
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:37:36.816334
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     -[ RECORD 3 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Stop Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:39:03.393647
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
 
 #### Stop the tracking of all subscriptions in a database
+Stopping tracking of all subscriptions logs one row for subscription on subscription_history table alerting of the stopping of the tracking, and does not log subsequent changes.
 
+     dell_rds=# select * from logicalrep_audit.stop_all_subscriptions_tracking();
+     NOTICE:  The subscription sub_categories is already being stopped.
+     NOTICE:  The tracking mecanism has been deleted.
+      stop_all_subscriptions_tracking 
+     --------------------------------
+
+     (1 line)
+     dell_rds=# alter subscription sub_categories enable;
+     ALTER SUBSCRIPTION
+     dell_rds=# alter subscription sub_products enable;
+     ALTER SUBSCRIPTION
+     dell_rds=# select * from logicalrep_audit.subscription_history order by date_time;
+     -[ RECORD 1 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:37:36.816334
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Start Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:37:36.816334
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     -[ RECORD 3 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18382
+     sub_name        | sub_categories
+     sub_database    | dell_rds
+     sub_action      | Stop Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 13:39:03.393647
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     -[ RECORD 4 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+     sub_oid         | 18383
+     sub_name        | sub_products
+     sub_database    | dell_rds
+     sub_action      | Stop Tracking
+     user_action     | postgres
+     date_time       | 2022-04-12 14:01:23.534523
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
