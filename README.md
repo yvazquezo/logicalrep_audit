@@ -69,11 +69,8 @@ To use the functionalities of logicalrep_audit, the extension must be created in
 #### Generate the DDL of a publication
 The function "generate_ddl_publication" generates the DDL of the publication passed by parameter, with the tables included in the publication and the publication options.
 
-##### Create a publication on dell database
      dell=# create publication pub_categories for table categories;
      CREATE PUBLICATION
-
-##### Generate the DDL of pub_categories
      dell=# select * from logicalrep_audit.generate_ddl_publication('pub_categories');
                                                                      generate_ddl_publication                                                                 
      ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,12 +80,9 @@ The function "generate_ddl_publication" generates the DDL of the publication pas
 #### Generate the DDL of a subscription
 The function "generate_ddl_subscription" generates the DDL of the subscription passed by parameter, with the subscription options:
 
-##### Create a subscription on dell_rds database
      dell_rds=# create subscription sub_categories connection 'host=192.168.0.31 port=5432 dbname=dell user=postgres password=postgres' publication pub_categories;
      NOTICE:  created replication slot « sub_categories » on publisher
      CREATE SUBSCRIPTION
-
-##### Generate the DDL of sub_categories
      dell_rds=# select * from logicalrep_audit.generate_ddl_subscription('sub_categories');
                                                                      generate_ddl_subscription                                                                                                                               
      ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,7 +104,7 @@ Start tracking of one publication logs on table publication_history all the chan
 * pub_initial_ddl: initial DDL of the publication before the change.
 * pub_final_ddl: final DDL of the publication after the change.
 
-The initial and final DD is the same when start tracking.
+The initial and final DDL is the same when start tracking.
 
      dell=# \dRp
                                                       Publications list
@@ -124,20 +118,7 @@ The initial and final DD is the same when start tracking.
       track_publication 
      -------------------
 
-     (1 line)
-
-     dell=# select * from logicalrep_audit.publication_history ;
-     -[ RECORD 1 ]
-     ---+-------------------------------------------------------------------------------------------------------------------------------------------------------
-     pub_oid         | 18198
-     pub_name        | pub_categories
-     pub_database    | dell
-     pub_action      | Start Tracking
-     user_action     | postgres
-     date_time       | 2022-04-12 11:53:02.638984
-     pub_initial_ddl | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete, truncate', publish_via_partition_root = false);
-     pub_final_ddl   | CREATE PUBLICATION pub_categories FOR TABLE public.categories WITH (publish = 'insert, update, delete, truncate', publish_via_partition_root = false);
-     
+     (1 line)  
      dell=# alter publication pub_categories set (publish = 'insert');
      ALTER PUBLICATION
      dell=# alter publication pub_categories set (publish = 'insert, update');
@@ -247,8 +228,7 @@ Reset tracking of one publication deletes all the rows in publication_history ta
       reset_publication_tracking 
      ---------------------------
 
-     (1 line) 
-
+     (1 line)
      dell=# select * from logicalrep_audit.publication_history order by date_time;
      -[ RECORD 1 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
      pub_oid         | 18217
@@ -285,8 +265,7 @@ Reset tracking of all publications deletes all the rows in publication_history t
       reset_all_publications_tracking 
      -------------------
 
-     (1 line) 
-     
+     (1 line)     
      dell=# select * from logicalrep_audit.publication_history order by date_time;
      -[ RECORD 1 ]---+---------------------------------------------------------------------------------------------------------------------------------------------
      pub_oid         | 18198
@@ -314,8 +293,7 @@ Stopping tracking of a publication logs a row in publication_history table alert
      stop_publication_tracking 
      -------------------------
 
-     (1 line) 
-
+     (1 line)
      dell=# alter publication pub_categories set (publish = 'insert');
      ALTER PUBLICATION
      dell=# alter publication pub_products set (publish = 'insert');
@@ -367,8 +345,7 @@ Stopping tracking of all publications logs one row for publication on publicatio
       stop_all_publications_tracking 
      --------------------------------
 
-     (1 line)
-     
+     (1 line)     
      dell=# alter publication pub_products set (publish = 'insert, update');
      ALTER PUBLICATION
      dell=# alter publication pub_categories set (publish = 'insert, update');
@@ -435,7 +412,7 @@ Start tracking of one subscription logs on table subscription_history all the ch
 * sub_initial_ddl: initial DDL of the subscription before the change.
 * sub_final_ddl: final DDL of the subscription after the change.
 
-The initial and final DD is the same when start tracking.
+The initial and final DDL is the same when start tracking.
 
      dell_rds=# \dRs
                        Subscriptions list
@@ -443,8 +420,7 @@ The initial and final DD is the same when start tracking.
      ----------------+--------------+--------+------------------
       sub_categories | postgres     | t      | {pub_categories}
       sub_products   | postgres     | t      | {pub_products}
-     (2 lines)
-     
+     (2 lines)     
      dell_rds=# select * from logicalrep_audit.track_subscription('sub_categories');
       track_subscription 
      --------------------
@@ -462,8 +438,8 @@ The initial and final DD is the same when start tracking.
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:29:03.109313
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 2 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -471,8 +447,8 @@ The initial and final DD is the same when start tracking.
      sub_action      | Alter Subscription
      user_action     | postgres
      date_time       | 2022-04-12 13:31:24.397981
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 3 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -480,8 +456,8 @@ The initial and final DD is the same when start tracking.
      sub_action      | Alter Subscription
      user_action     | postgres
      date_time       | 2022-04-12 13:31:32.723749
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
 
 #### Start the tracking of all subscriptions in a database
 Start tracking of all subscriptions in the database logs on subscription_history table all the changes made to the structure of all subscriptions.
@@ -501,8 +477,8 @@ Start tracking of all subscriptions in the database logs on subscription_history
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:29:03.109313
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 2 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -510,8 +486,8 @@ Start tracking of all subscriptions in the database logs on subscription_history
      sub_action      | Alter Subscription
      user_action     | postgres
      date_time       | 2022-04-12 13:31:24.397981
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 3 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -519,8 +495,8 @@ Start tracking of all subscriptions in the database logs on subscription_history
      sub_action      | Alter Subscription
      user_action     | postgres
      date_time       | 2022-04-12 13:31:32.723749
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = false, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 4 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -528,8 +504,8 @@ Start tracking of all subscriptions in the database logs on subscription_history
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:33:30.123584
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
      -[ RECORD 5 ]---+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -537,8 +513,8 @@ Start tracking of all subscriptions in the database logs on subscription_history
      sub_action      | Alter Subscription
      user_action     | postgres
      date_time       | 2022-04-12 13:34:19.60262
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
 
 #### Reset the tracking of one subscription
 Reset tracking of one subscription deletes all the rows in subscription_history table of the subscription and restart the tracking.
@@ -556,8 +532,8 @@ Reset tracking of one subscription deletes all the rows in subscription_history 
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:33:30.123584
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
      -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -565,8 +541,8 @@ Reset tracking of one subscription deletes all the rows in subscription_history 
      sub_action      | Alter Subscription
      user_action     | postgres
      date_time       | 2022-04-12 13:34:19.60262
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = true, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
      -[ RECORD 3 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -574,8 +550,8 @@ Reset tracking of one subscription deletes all the rows in subscription_history 
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:36:03.775922
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
 
 #### Reset the tracking of all subscriptions in a database
 Reset tracking of all publicsubscriptionsations deletes all the rows in subscription_history table of all existing subscriptions and restart their tracking.
@@ -593,8 +569,8 @@ Reset tracking of all publicsubscriptionsations deletes all the rows in subscrip
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:37:36.816334
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -602,8 +578,8 @@ Reset tracking of all publicsubscriptionsations deletes all the rows in subscrip
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:37:36.816334
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
 
 #### Stop the tracking of one subscription
 Stopping tracking of a subscription logs a row in subscription_history table alerting of the stopping of the tracking, and does not log subsequent changes.
@@ -623,8 +599,8 @@ Stopping tracking of a subscription logs a row in subscription_history table ale
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:37:36.816334
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -632,8 +608,8 @@ Stopping tracking of a subscription logs a row in subscription_history table ale
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:37:36.816334
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
      -[ RECORD 3 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -641,8 +617,8 @@ Stopping tracking of a subscription logs a row in subscription_history table ale
      sub_action      | Stop Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:39:03.393647
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
 
 #### Stop the tracking of all subscriptions in a database
 Stopping tracking of all subscriptions logs one row for subscription on subscription_history table alerting of the stopping of the tracking, and does not log subsequent changes.
@@ -666,8 +642,8 @@ Stopping tracking of all subscriptions logs one row for subscription on subscrip
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:37:36.816334
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 2 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -675,8 +651,8 @@ Stopping tracking of all subscriptions logs one row for subscription on subscrip
      sub_action      | Start Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:37:36.816334
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
      -[ RECORD 3 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18382
      sub_name        | sub_categories
@@ -684,8 +660,8 @@ Stopping tracking of all subscriptions logs one row for subscription on subscrip
      sub_action      | Stop Tracking
      user_action     | postgres
      date_time       | 2022-04-12 13:39:03.393647
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_categories CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_categories WITH (connect = true, enabled = true, copy_data = true, create_slot = true, slot_name = sub_categories, synchronous_commit = 'off');
      -[ RECORD 4 ]---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      sub_oid         | 18383
      sub_name        | sub_products
@@ -693,5 +669,5 @@ Stopping tracking of all subscriptions logs one row for subscription on subscrip
      sub_action      | Stop Tracking
      user_action     | postgres
      date_time       | 2022-04-12 14:01:23.534523
-     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
-     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=postgres' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_initial_ddl | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
+     sub_final_ddl   | CREATE SUBSCRIPTION sub_products CONNECTION 'host=localhost port=5432 dbname=dell user=postgres password=jP7pq:."uD"@M{j@' PUBLICATION pub_products WITH (connect = true, enabled = false, copy_data = false, create_slot = true, slot_name = sub_products, synchronous_commit = 'off');
