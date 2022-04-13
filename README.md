@@ -1,7 +1,7 @@
 # logicalrep_audit
 *PostgreSQL extension that allows you to get information and enable auditing for logical replication*
 
-###### Version: 1.0 | Author: Yudisney Vazquez (yvazquezo@gmail.com)
+###### Version: 1.0 | Author: Yudisney Vazquez
 
 ## Description
 logicalrep_audit is a PostgreSQL extension that allows you to get information and enable auditing for logical replication, allowing:
